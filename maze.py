@@ -1,4 +1,3 @@
-import time
 import gym
 import gym_maze
 import numpy as np
@@ -23,7 +22,9 @@ def epsilon_greedy(state):
 
 def q_learning(curr_state, next_state, curr_action, Q):
 
-    temporal_difference = get_reward(next_state) + (gamma * np.max(Q[next_state])) - Q[curr_state][curr_action]
+    temporal_difference = get_reward(next_state) + (gamma * np.max(Q[next_state]))\
+                          - Q[curr_state][curr_action]
+
     Q[curr_state][curr_action] = Q[curr_state][curr_action] + (alpha * temporal_difference)
     return Q
 
@@ -32,7 +33,7 @@ if __name__ == '__main__':
 
     # Create an environment
     env = gym.make("maze-random-10x10-plus-v0")
-    observation = env.reset()
+    env.reset()
 
     # Define the maximum number of iterations
     NUM_EPISODES = 1000
@@ -59,9 +60,6 @@ if __name__ == '__main__':
 
             next_state, reward, done, truncated = env.step(current_action)
 
-            # if episode > 300:
-            #     time.sleep(0.1)
-
             next_state = int(next_state[1] * 10 + next_state[0])
 
             next_action = epsilon_greedy(next_state)
@@ -83,21 +81,17 @@ if __name__ == '__main__':
             if done or truncated:
                 finding_count += 1
                 print(f"Reached the goal for the {finding_count} time")
-                observation = env.reset()
+                env.reset()
                 current_state = 0
                 current_action = epsilon_greedy(current_state)
                 break
 
-        observation = env.reset()
+        env.reset()
         current_state = 0
         current_action = epsilon_greedy(current_state)
 
-        # if episode == 120:
-        #     if np.max(np.abs(q_list[0], q_list[1])) < 1e-10 :
-        #         print(f"in episode: {episode} converged")
-        print(f"{abs(np.linalg.norm(old_q) - np.linalg.norm(Q))}")
-
         if abs(np.linalg.norm(old_q) - np.linalg.norm(Q)) < 1e-4:
             print(f"in episode: {episode} converged")
+
     # Close the environment
     env.close()
