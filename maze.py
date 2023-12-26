@@ -1,6 +1,9 @@
+import time
 import gym
 import gym_maze
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 def get_reward(next_state):
@@ -30,7 +33,7 @@ def q_learning(curr_state, next_state, curr_action, Q):
 
 
 if __name__ == '__main__':
-
+    matplotlib.use('TkAgg')
     # Create an environment
     env = gym.make("maze-random-10x10-plus-v0")
     env.reset()
@@ -38,7 +41,7 @@ if __name__ == '__main__':
     # Define the maximum number of iterations
     NUM_EPISODES = 1000
     MAX_STEP = 100
-    epsilon = 0.9
+    epsilon = 0.1
     gamma = 0.9
     alpha = 0.9
     done = False
@@ -50,15 +53,22 @@ if __name__ == '__main__':
     finding_count = 0
     converged = False
 
-    q_list = []
+    total_reward_list = []
+    mean_list = []
+    x_axis = []
+    for i in range(1000):
+        x_axis.append(i)
 
     for episode in range(NUM_EPISODES):
+        total_reward = 0
         print(f"episode: {episode}")
         old_q = np.copy(Q)
         for step in range(MAX_STEP):
             env.render()
 
             next_state, reward, done, truncated = env.step(current_action)
+
+            total_reward += reward
 
             next_state = int(next_state[1] * 10 + next_state[0])
 
@@ -92,6 +102,20 @@ if __name__ == '__main__':
 
         if abs(np.linalg.norm(old_q) - np.linalg.norm(Q)) < 1e-4:
             print(f"in episode: {episode} converged")
+
+        total_reward_list.append(total_reward)
+
+        mean = 0
+        sum = 0
+        for t_reward in total_reward_list:
+            sum += t_reward
+        mean = sum / len(total_reward_list)
+        mean_list.append(mean)
+
+    plt.plot(x_axis, mean_list)
+    plt.xlabel("Episode")
+    plt.ylabel("Mean Total Reward")
+    plt.show()
 
     # Close the environment
     env.close()
